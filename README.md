@@ -1,44 +1,59 @@
 # SCD Classifier
 
-A neural network model for detecting sickle cell disease (SCD) from images of red blood cell (RBC) samples.
+A neural network model for detecting Sickle Cell Disease (SCD) from images of red blood cell (RBC) samples.
+
+## Description
+
+This project presents a machine learning approach to identify SCD by analyzing RBC images. Utilizing the **erythrocytesIDB** dataset, the model processes microscopic images to extract key features and employs a neural network for classification.
 
 ## Dataset
-This model utilizes the **ErythrocytesIDB** dataset, which contains microscopic images of RBCs.
+
+The **erythrocytesIDB** dataset, developed by the University of the Balearic Islands, comprises 626 images of individual RBCs categorized into:
+- **Normal Erythrocytes:** 202 images
+- **Sickle Cells:** 211 images
+- **Other Deformations:** 213 images
+
+Each image is in JPG format with a resolution of 80x80 pixels. citeturn0search0
 
 ## Preprocessing
-Before training, the RBC images are preprocessed to extract useful features.
 
 ### Image Preprocessing
-The images undergo edge detection and object segmentation to identify and isolate individual RBCs. A binary fill operation helps to refine the segmented regions, and only significant structures are retained based on a predefined size threshold.
+
+The preprocessing pipeline includes:
+- **Edge Detection:** Identifies cell boundaries.
+- **Object Segmentation:** Isolates individual RBCs.
+- **Binary Fill Operations:** Refines segmented regions.
+- **Size Filtering:** Retains structures exceeding a predefined size threshold.
 
 ### Feature Extraction
-From each preprocessed image, the following features are extracted and stored in a CSV file:
-- **Area**
-- **Perimeter**
-- **Circularity**
 
-### Data Splitting
-The dataset is split as follows:
+From each processed image, the following features are extracted and stored in a CSV file:
+- **Area:** The number of pixels within the cell boundary.
+- **Perimeter:** The length of the cell boundary.
+- **Circularity:** Calculated as \( 4\pi \times \frac{\text{Area}}{\text{Perimeter}^2} \), indicating how close the shape is to a perfect circle.
+
+## Data Splitting
+
+The dataset is divided as follows:
 - **60% Training**
 - **20% Validation**
 - **20% Testing**
 
 ## Neural Network Model
-A feedforward neural network is implemented using TensorFlow/Keras with the following characteristics:
-- **Input Layer:** 3 features (area, perimeter, circularity)
-- **Two Hidden Layers:** Each with 32 neurons and ReLU activation
-- **Output Layer:** Single neuron with sigmoid activation for binary classification
-- **Loss Function:** Binary cross-entropy
-- **Optimizer:** Adam
+
+Implemented using TensorFlow/Keras, the feedforward neural network comprises:
+- **Input Layer:** 3 neurons corresponding to the extracted features.
+- **Two Hidden Layers:** Each with 32 neurons and ReLU activation.
+- **Output Layer:** Single neuron with sigmoid activation for binary classification.
+- **Loss Function:** Binary cross-entropy.
+- **Optimizer:** Adam.
 
 ## Performance
-The model achieved **96% accuracy** on the test dataset.
+
+The model achieved an accuracy of **96%** on the test dataset.
 
 ## Future Improvements
-- Increase dataset size for better generalization.
-- Experiment with convolutional neural networks (CNNs) for direct image classification.
-- Fine-tune hyperparameters for improved accuracy.
 
-## License
-This project is licensed under the MIT License.
-
+- **Dataset Expansion:** Incorporate additional data to enhance model generalization.
+- **Exploration of CNN Architectures:** Investigate models like ResNet-50 and MobileNet for direct image classification. citeturn0search6
+- **Hyperparameter Optimization:** Fine-tune parameters to boost accuracy.
