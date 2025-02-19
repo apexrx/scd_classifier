@@ -15,7 +15,7 @@ The **erythrocytesIDB** dataset, developed by the University of the Balearic Isl
 
 Each image is in JPG format with a resolution of 80x80 pixels.
 
-More Info: http://erythrocytesidb.uib.es/
+More Info: http://erythrocytesidb.uib.es/
 
 ## Preprocessing
 
@@ -32,7 +32,14 @@ The preprocessing pipeline includes:
 From each processed image, the following features are extracted and stored in a CSV file:
 - **Area:** The number of pixels within the cell boundary.
 - **Perimeter:** The length of the cell boundary.
-- **Circularity:** Calculated as \( 4\pi \times \frac{\text{Area}}{\text{Perimeter}^2} \), indicating how close the shape is to a perfect circle.
+- **Circularity:** Calculated as
+
+\[
+4\pi \times \frac{\text{Area}}{\text{Perimeter}^2}
+\]
+
+indicating how close the shape is to a perfect circle.
+
 
 ## Data Splitting
 
