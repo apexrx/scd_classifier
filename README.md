@@ -13,7 +13,9 @@ The **erythrocytesIDB** dataset, developed by the University of the Balearic Isl
 - **Sickle Cells:** 211 images
 - **Other Deformations:** 213 images
 
-Each image is in JPG format with a resolution of 80x80 pixels. citeturn0search0
+Each image is in JPG format with a resolution of 80x80 pixels.
+
+More Info: http://erythrocytesidb.uib.es/
 
 ## Preprocessing
 
