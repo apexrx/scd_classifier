@@ -97,55 +97,56 @@ To improve prediction accuracy, we use an ensemble method that combines the pred
 
 ## Performance
 
+The models were evaluated on a held-out test set.  The Neural Network model achieved the highest accuracy, while the ensemble method prioritized high recall of sickle cells, which is crucial for minimizing false negatives in disease detection.
+
+**Key Highlights:**
+
+*   **Neural Network Accuracy:** 92%
+*   **Ensemble Model Recall (Sickle Cell):** 96%
+
+**Detailed Performance Metrics:**
+
+For a more in-depth view of the performance of each model, see the tables below:
+
 **Ensemble Model Performance:**
 
-The ensemble model achieved the following performance metrics on the test dataset:
-
-*   **Accuracy:** 86.83%
-*   **Precision (Sickle Cell - class 1):** 63%
-*   **Recall (Sickle Cell - class 1):** 96%
-*   **F1-Score (Sickle Cell - class 1):** 76%
-
-For a broader evaluation of the ensemble model:
-
-*   **Macro Average Precision:** 81%
-*   **Macro Average Recall:** 90%
-*   **Macro Average F1-Score:** 84%
-*   **Weighted Average Accuracy:** 87%
+| Metric                       | Value   |
+|-------------------------------|---------|
+| Accuracy                    | 86.83%  |
+| Precision (Sickle Cell)        | 63%     |
+| Recall (Sickle Cell)           | 96%     |
+| F1-Score (Sickle Cell)         | 76%     |
+| Macro Avg Precision           | 81%     |
+| Macro Avg Recall              | 90%     |
+| Macro Avg F1-Score            | 84%     |
+| Weighted Avg Accuracy       | 87%     |
 
 **Neural Network Model Performance:**
 
-The neural network model alone achieved the following performance metrics on the test dataset:
-
-*   **Accuracy:** 91.54% (reported as 0.9154471755027771) and 92% in the classification report.
-*   **Precision (Sickle Cell - class 1):** 77% (reported as 0.7692307829856873) and 77% in the classification report.
-*   **Recall (Sickle Cell - class 1):** 91% (reported as 0.9090909361839294) and 91% in the classification report.
-*   **F1-Score (Sickle Cell - class 1):** 83% in the classification report.
-
-The neural network also reported an AUC (Area Under the ROC Curve) of 0.9719 (or 0.9755).
-
-For a broader evaluation of the neural network model:
-
-*   **Macro Average Precision:** 87%
-*   **Macro Average Recall:** 91%
-*   **Macro Average F1-Score:** 89%
-*   **Weighted Average Accuracy:** 92%
+| Metric                       | Value   |
+|-------------------------------|---------|
+| Accuracy                    | 92%     |
+| Precision (Sickle Cell)        | 77%     |
+| Recall (Sickle Cell)           | 91%     |
+| F1-Score (Sickle Cell)         | 83%     |
+| Macro Avg Precision           | 87%     |
+| Macro Avg Recall              | 91%     |
+| Macro Avg F1-Score            | 89%     |
+| Weighted Avg Accuracy       | 92%     |
+| AUC                           | ~0.97   |
 
 **KNN Model Performance:**
 
-The KNN model achieved the following performance metrics on the test dataset:
-
-*   **Accuracy:** 86.50%
-*   **Precision (Sickle Cell - class 1):** 63%
-*   **Recall (Sickle Cell - class 1):** 91%
-*   **F1-Score (Sickle Cell - class 1):** 75%
-
-For a broader evaluation of the KNN model:
-
-*   **Macro Average Precision:** 80%
-*   **Macro Average Recall:** 88%
-*   **Macro Average F1-Score:** 83%
-*   **Weighted Average Accuracy:** 90%
+| Metric                       | Value   |
+|-------------------------------|---------|
+| Accuracy                    | 86.50%  |
+| Precision (Sickle Cell)        | 63%     |
+| Recall (Sickle Cell)           | 91%     |
+| F1-Score (Sickle Cell)         | 75%     |
+| Macro Avg Precision           | 80%     |
+| Macro Avg Recall              | 88%     |
+| Macro Avg F1-Score            | 83%     |
+| Weighted Avg Accuracy       | 90%     |
 
 ## Example Results
 
