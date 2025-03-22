@@ -6,56 +6,31 @@ from skimage.feature import canny
 from scipy import ndimage as ndi
 import math
 
-
-
-
 def image_prep(path):
-    mask_size = 400
     img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-    edges = canny(img/255.)
-    fill_img = ndi.binary_fill_holes(edges)
-    label_objects, nb_labels = ndi.label(fill_img)
-    sizes = np.bincount(label_objects.ravel())
-    mask_sizes = sizes > mask_size
-    mask_sizes[0] = 0
-    img_cleaned = mask_sizes[label_objects]
-    labeled_img, num_features = ndi.label(img_cleaned)
+    binary_img = img > 128  # Simple threshold to make it binary (adjust 128 if needed)
+    fill_img = ndi.binary_fill_holes(binary_img) # Fill holes within cells
+    labeled_img, num_features = ndi.label(fill_img) # Label connected components (cells)
     return labeled_img, num_features
 
 def numofneighbour(mat, i, j, searchValue):
-    count = 0;
-
-    # UP
-    if (i > 0 and mat[i - 1][j] == searchValue):
-        count += 1;
-
-        # LEFT
-    if (j > 0 and mat[i][j - 1] == searchValue):
-        count += 1;
-
-        # DOWN
-    if (i < len(mat) - 1 and mat[i + 1][j] == searchValue):
+    count = 0
+    if i > 0 and mat[i - 1][j] == searchValue:
         count += 1
-
-    # RIGHT
-    # RIGHT
-    if (j < len(mat[i]) - 1):
+    if j > 0 and mat[i][j - 1] == searchValue:
         count += 1
+    if i < len(mat) - 1 and mat[i + 1][j] == searchValue:
+        count += 1
+    if j < len(mat[i]) - 1 and mat[i][j + 1] == searchValue:
+        count += 1
+    return count
 
-    return count;
-
-
-# Returns sum of perimeter of shapes formed with 1s
 def findperimeter(mat, num_features):
-    perimeter = [0] * (num_features + 1)  # Adjusted the size of the perimeter list
-
-    # Traversing the matrix and finding ones to calculate their contribution.
+    perimeter = [0] * (num_features + 1)
     for i in range(len(mat)):
         for j in range(0, len(mat[i])):
             if mat[i][j] != 0:
-                # Calculate the perimeter contribution based on the current feature
                 perimeter[mat[i][j]] += (4 - numofneighbour(mat, i, j, mat[i][j]))
-
     return perimeter
 
 def extract_area_perim(img,num_features):
@@ -70,31 +45,25 @@ def extract_area_perim(img,num_features):
 def extract_circularity(area, perimeter):
     if not area or not perimeter:
         return []
-
     circularity = []
     for i in range(len(area)):
         if perimeter[i] != 0:
             circularity.append((4 * math.pi * area[i]) / (math.pow(perimeter[i], 2)))
         else:
-            circularity.append(0)  # Handling division by zero
-
+            circularity.append(0)
     return circularity
 
 def convert_to_relative(cellAreas, cellPerims):
     if not cellAreas or not cellPerims:
         return cellAreas, cellPerims
-
     relativeArea = []
     relativePerim = []
-
     if cellAreas:
-        averageCellSize = sum(cellAreas) / len(cellAreas)
+        averageCellSize = sum(cellAreas) / len(cellAreas) if len(cellAreas) > 0 else 1
         relativeArea = [area / averageCellSize for area in cellAreas]
-
     if cellPerims:
-        averagePerimSize = sum(cellPerims) / len(cellPerims)
+        averagePerimSize = sum(cellPerims) / len(cellPerims) if len(cellPerims) > 0 else 1
         relativePerim = [perim / averagePerimSize for perim in cellPerims]
-
     return relativeArea, relativePerim
 
 def removeFromImg(img, feature):
@@ -104,90 +73,75 @@ def removeFromImg(img, feature):
                 img[i][j] = 0
     return img
 
-
 def removeOutliers(area, perim, img):
     if not area or not perim:
         return [], [], img
-
     mean = np.mean(area)
     std = np.std(area)
     new_area = []
     new_perim = []
-    new_img = img.copy()  # Make a copy to avoid modifying the original image
-
+    new_img = img.copy()
     for i in range(len(area)):
         if area[i] <= mean + 3.5 * std:
             new_area.append(area[i])
             new_perim.append(perim[i])
         else:
-            print("Popping feature:", i + 1)  # Adjust index for printing the correct feature index
-            new_img = removeFromImg(new_img, i + 1)  # Adjust index for removing the correct feature
-
-    # Check if at least one element remains after outlier removal
-    if len(new_area) == 0:
-        # If all elements were considered outliers, keep the largest one
+            print("Popping feature:", i + 1)
+            new_img = removeFromImg(new_img, i + 1)
+    if len(new_area) == 0 and len(area) > 0: # Check if original area list was not empty before trying to get max
         max_area_index = np.argmax(area)
         new_area.append(area[max_area_index])
         new_perim.append(perim[max_area_index])
         print("All elements were considered outliers. Keeping the largest one.")
-
     return new_area, new_perim, new_img
 
-#......................................................................................................
+# Main script to process images and create CSV
+if __name__ == "__main__":
+    root_folder = "erthrocytesIDB\erthrocytesIDB"
+    subfolders = ["erythrocytesIDB2", "erythrocytesIDB3"]
+    image_types = ["mask-circular.jpg", "mask-elongated.jpg"]
+    csv_filename = "cell_features.csv"
 
-main_folder = "."
+    with open(csv_filename, mode='w', newline='') as csvfile:
+        csv_writer = csv.writer(csvfile)
+        csv_writer.writerow(["area", "perimeter", "circularity", "class"]) # Write header
 
-# Define the output text file name
-output_file = "healthyCells.txt"
+        for subfolder in subfolders:
+            subfolder_path = os.path.join(root_folder, subfolder)
+            if not os.path.exists(subfolder_path) or not os.path.isdir(subfolder_path):
+                print(f"Subfolder '{subfolder_path}' not found.")
+                continue
 
-# Open the text file in write mode
-with open(output_file, 'w') as txtfile:
-    # Write the data to the text file in the specified format
-    txtfile.write("[\n")
-
-    # Iterate through each subfolder
-    for subfolder in ['erythrocytesIDB2', 'erythrocytesIDB3']:
-        subfolder_path = os.path.join(main_folder, subfolder)
-
-        # Check if the subfolder path exists
-        if not os.path.exists(subfolder_path):
-            print(f"Folder '{subfolder}' not found.")
-            continue
-
-        # Iterate through each sub-subfolder
-        for sub_subfolder in os.listdir(subfolder_path):
-            sub_subfolder_path = os.path.join(subfolder_path, sub_subfolder)
-
-            # Check if the path is a directory
-            if os.path.isdir(sub_subfolder_path):
-                # Construct the path to the image file
-                image_path = os.path.join(sub_subfolder_path, "mask-circular.jpg")
-
-                # Check if the image file exists
-                if not os.path.exists(image_path):
-                    print(f"Image file not found in '{sub_subfolder_path}'. Skipping...")
+            for image_folder in sorted(os.listdir(subfolder_path)): # Sort to process in numerical order
+                image_folder_path = os.path.join(subfolder_path, image_folder)
+                if not os.path.isdir(image_folder_path):
                     continue
 
-                # Perform image processing
-                result, num_features = image_prep(image_path)
-                areaArray, perimArray = extract_area_perim(result, num_features)
-                if areaArray:
-                    areaArray.pop(0)
-                if perimArray:
-                    perimArray.pop(0)
-                circularityArray = extract_circularity(areaArray, perimArray)
-                relativeAreaArray, relativePerimArray = convert_to_relative(areaArray, perimArray)
-                imag = removeFromImg(result, num_features)
-                area, perimeter, img = removeOutliers(relativeAreaArray, relativePerimArray, imag)
-
-                # Write the data to the text file
-                for i in range(len(area)):
-                    if i == len(area) - 1 and subfolder == 'erythrocytesIDB3' and sub_subfolder == 'image_120':
-                        # If it's the last data point, omit the comma and newline character
-                        txtfile.write(f"[{area[i]}, {perimeter[i]}, {circularityArray[i]}]\n")
+                for image_type in image_types:
+                    # Determine class based on image_type
+                    if image_type == "mask-circular.jpg":
+                        cell_class = 0 # 0 for healthy (circular)
+                    elif image_type == "mask-elongated.jpg":
+                        cell_class = 1 # 1 for elongated
                     else:
-                        txtfile.write(f"[{area[i]}, {perimeter[i]}, {circularityArray[i]}],\n")
+                        cell_class = -1 # Optional: Handle other image types if needed
 
-    txtfile.write("]\n")
+                    image_path = os.path.join(image_folder_path, image_type)
+                    if os.path.exists(image_path):
+                        print(f"Processing image: {image_path}")
+                        result, num_features = image_prep(image_path)
+                        areaArray, perimArray = extract_area_perim(result, num_features)
 
-print("Data extraction and writing to text file completed successfully.")
+                        if areaArray:
+                            areaArray.pop(0) # Remove background area
+                        if perimArray:
+                            perimArray.pop(0) # Remove background perimeter
+                        circularityArray = extract_circularity(areaArray, perimArray)
+                        relativeAreaArray, relativePerimArray = convert_to_relative(areaArray, perimArray)
+                        area, perimeter, img = removeOutliers(relativeAreaArray, relativePerimArray, result.copy()) # Use result.copy()
+
+                        for i in range(len(area)):
+                            if i < len(perimeter) and i < len(circularityArray):
+                                csv_writer.writerow([area[i], perimeter[i], circularityArray[i], cell_class])
+
+    print(f"CSV file '{csv_filename}' created successfully.")
